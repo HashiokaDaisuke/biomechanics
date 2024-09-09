@@ -1,4 +1,4 @@
-class Class1:#慣習的に頭文字は大文字
+class Class1:#慣習的にクラス名の頭文字は大文字
     """Test class: Class1"""
     def __init__(self, name, birth, mathScore, japaneseScore):
         self.__name = name
