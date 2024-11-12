@@ -4,25 +4,34 @@ import math
 
 
 class Particle:
-    def __init__(self, init_pos, vel, theta,r):
+    def __init__(self, init_pos, r, theta_cut):
         self.is_alive = True
         self.x, self.y = 0,0
         self.init_x, self.init_y = init_pos
-        self.v = vel
-        self.theta = theta
+        self.v, self.vx, self.vy = 0, 0, 0
+        self.theta = -90 #[deg]
         self.r = r
+        self.theta_cut = theta_cut
 
     def update(self, width, height, dt, g):
-        self.g_theta = - g * math.sin(math.radians(self.theta))
-        self.v += self.g_theta * dt
-        self.theta += self.v / self.r * 180 / math.pi
-        self.x = self.init_x + self.r * math.sin(math.radians(self.theta))
-        self.y = self.init_y - self.r * (1 - math.cos(math.radians(self.theta)))
-        if self.x < 0 or self.x > width or self.y > height:
+        if self.theta < self.theta_cut:
+            self.g_theta = - g * math.sin(math.radians(self.theta))
+            self.v += self.g_theta * dt
+            self.theta += self.v / self.r * 180 / math.pi * dt
+            self.x = self.init_x + self.r * math.sin(math.radians(self.theta))
+            self.y = self.init_y - self.r * (1 - math.cos(math.radians(self.theta)))
+            self.vx = self.v * math.cos(math.radians(self.theta))
+            self.vy = -self.v * math.sin(math.radians(self.theta))
+        else:
+            self.vy += g * dt
+            self.x += self.vx * dt
+            self.y += self.vy * dt
+            self.v += self.g_theta * dt
+        if self.x < 0 or self.x > width or self.y > self.init_y:
             self.is_alive = False
 
     def draw(self, screen):
-        radius = 10
+        radius = 4
         pygame.draw.circle(screen, pygame.Color("green"), (self.x, self.y), radius)
 
 
@@ -32,11 +41,10 @@ def main():
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
 
-    dt = 1.0
+    dt = 0.4
     g = 0.5
-    theta = -90
     r = 100
-    v = 0
+    theta_cut = 40.9853
     particle_list = []
 
     while True:
@@ -53,7 +61,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
 
-                    p = Particle((150,350), v, theta ,r)
+                    p = Particle((150,350), r, theta_cut)
                     particle_list.append(p)
         if should_quit:
             break
@@ -64,6 +72,9 @@ def main():
         particle_list[:] = [p for p in particle_list if p.is_alive]
 
         screen.fill(pygame.Color("black"))
+        pygame.draw.line(screen, (0,95,0), (150,250), (150,350), 2)
+        pygame.draw.line(screen, (0,95,0), (0,350), (600,350), 2)
+        pygame.draw.arc(screen, (0,95,0),(50,150,200,200), math.radians(180), math.radians(270 + theta_cut), 1)
         for p in particle_list:
             p.draw(screen)
         pygame.display.update()
