@@ -65,10 +65,15 @@ def update(frame_cnt):
     ax.set_aspect('equal')
     ax.set_xlim(-L-W-1, L+W+1)
     ax.set_ylim(-L-1, H+L+1)
+    
+    plt.title(f'frame{frame_cnt}')
+
 
 def main():
-    ani = animation.FuncAnimation(fig, update, interval=30,frames=int(1/0.01*6))
-    plt.show()
+    ani = animation.FuncAnimation(fig, update, interval=10,frames=int(1/0.01*3))
+    #plt.show()
+
+    ani.save("output.mp4", writer="ffmpeg", fps=30, dpi=300)
     
 if __name__ == "__main__":
     main()
